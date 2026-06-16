@@ -1,0 +1,661 @@
+{
+  "name": "APIs",
+  "nodes": [
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "httpMethod": [
+          "GET",
+          "DELETE",
+          "PATCH",
+          "POST"
+        ],
+        "path": "notes",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -96,
+        128
+      ],
+      "id": "a26a9f78-0b61-44e5-b60f-eae93a7396d0",
+      "name": "Webhook",
+      "webhookId": "1eb376e7-43e0-42f5-a34b-0e649c4de71e",
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "jj8AVgSayUJQjHBX",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "4ZWt3MvfvNSpwpqb",
+          "mode": "list",
+          "cachedResultName": "voice_notes_table",
+          "cachedResultUrl": "/projects/eZeMgf4u98eUuqvx/datatables/4ZWt3MvfvNSpwpqb"
+        },
+        "matchType": "allConditions",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        -16
+      ],
+      "id": "d089958c-b35a-4159-a926-84d0225b49a8",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const data = item.json;\n\n  const parseArray = (value) => {\n    if (!value) return [];\n    if (Array.isArray(value)) return value;\n    try {\n      return JSON.parse(value);\n    } catch {\n      return [];\n    }\n  };\n\n  return {\n    json: {\n      ...data,\n      keyTopics: parseArray(data.keyTopics),\n      people: parseArray(data.people),\n      places: parseArray(data.places),\n      mood: parseArray(data.mood),\n      actionItems: parseArray(data.actionItems),\n      reflectionNotes: parseArray(data.reflectionNotes),\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -16
+      ],
+      "id": "1026a279-fbf0-4b0c-8603-9e93623656c5",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const data = item.json;\n\n  const parseArray = (value) => {\n    if (!value) return [];\n    if (Array.isArray(value)) return value;\n    try {\n      return JSON.parse(value);\n    } catch {\n      return [];\n    }\n  };\n\n  return {\n    json: {\n      ...data,\n      keyTopics: parseArray(data.keyTopics),\n      people: parseArray(data.people),\n      places: parseArray(data.places),\n      mood: parseArray(data.mood),\n      actionItems: parseArray(data.actionItems),\n      reflectionNotes: parseArray(data.reflectionNotes),\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        128
+      ],
+      "id": "bb4a9883-a5b7-45b7-83d1-e84d8585da46",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "value": "4ZWt3MvfvNSpwpqb",
+          "mode": "list",
+          "cachedResultName": "voice_notes_table",
+          "cachedResultUrl": "/projects/eZeMgf4u98eUuqvx/datatables/4ZWt3MvfvNSpwpqb"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $json.query.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        128
+      ],
+      "id": "a7db157d-94f9-44e5-84b2-b4a442beb09f",
+      "name": "Delete row(s)"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "4ZWt3MvfvNSpwpqb",
+          "mode": "list",
+          "cachedResultName": "voice_notes_table",
+          "cachedResultUrl": "/projects/eZeMgf4u98eUuqvx/datatables/4ZWt3MvfvNSpwpqb"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.body.title }}",
+            "category": "={{ $json.body.category }}",
+            "shortSummary": "={{ $json.body.shortSummary }}",
+            "fullSummary": "={{ $json.body.fullSummary }}",
+            "transcript": "={{ $json.body.transcript }}",
+            "keyTopics": "={{ $json.body.keyTopics.join(', ') }}",
+            "people": "={{ $json.body.people.join(', ') }}",
+            "places": "={{ $json.body.places.join(', ') }}",
+            "mood": "={{ $json.body.mood.join(', ') }}",
+            "actionItems": "={{ $json.body.actionItems.join(', ') }}",
+            "reflectionNotes": "={{ $json.body.reflectionNotes.join(', ') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "shortSummary",
+              "displayName": "shortSummary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fullSummary",
+              "displayName": "fullSummary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "transcript",
+              "displayName": "transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "keyTopics",
+              "displayName": "keyTopics",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "people",
+              "displayName": "people",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "places",
+              "displayName": "places",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "mood",
+              "displayName": "mood",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "actionItems",
+              "displayName": "actionItems",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reflectionNotes",
+              "displayName": "reflectionNotes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "imageStatus",
+              "displayName": "imageStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "imageUrl",
+              "displayName": "imageUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        432
+      ],
+      "id": "371752e6-b89c-4b8a-a8ca-baf5e2f10694",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const data = item.json;\n\n  const parseArray = (value) => {\n    if (!value) return [];\n    if (Array.isArray(value)) return value;\n    try {\n      return JSON.parse(value);\n    } catch {\n      return [];\n    }\n  };\n\n  return {\n    json: {\n      ...data,\n      keyTopics: parseArray(data.keyTopics),\n      people: parseArray(data.people),\n      places: parseArray(data.places),\n      mood: parseArray(data.mood),\n      actionItems: parseArray(data.actionItems),\n      reflectionNotes: parseArray(data.reflectionNotes),\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        288
+      ],
+      "id": "16c4052a-7081-40cf-8c67-75ccac91b47f",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const data = item.json;\n\n  const parseArray = (value) => {\n    if (!value) return [];\n    if (Array.isArray(value)) return value;\n    try {\n      return JSON.parse(value);\n    } catch {\n      return [];\n    }\n  };\n\n  return {\n    json: {\n      ...data,\n      keyTopics: parseArray(data.keyTopics),\n      people: parseArray(data.people),\n      places: parseArray(data.places),\n      mood: parseArray(data.mood),\n      actionItems: parseArray(data.actionItems),\n      reflectionNotes: parseArray(data.reflectionNotes),\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        432
+      ],
+      "id": "884b5f2d-fe38-43b2-9793-2cac8bba87fc",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "4ZWt3MvfvNSpwpqb",
+          "mode": "list",
+          "cachedResultName": "voice_notes_table",
+          "cachedResultUrl": "/projects/eZeMgf4u98eUuqvx/datatables/4ZWt3MvfvNSpwpqb"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $json.query.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.body.title }}",
+            "category": "={{ $json.body.category }}",
+            "shortSummary": "={{ $json.body.shortSummary }}",
+            "fullSummary": "={{ $json.body.fullSummary }}",
+            "transcript": "={{ $json.body.transcript }}",
+            "keyTopics": "={{ $json.body.keyTopics.join(', ') }}",
+            "people": "={{ $json.body.people.join(', ') }}",
+            "places": "={{ $json.body.places.join(', ') }}",
+            "mood": "={{ $json.body.mood.join(', ') }}",
+            "actionItems": "={{ $json.body.actionItems.join(', ') }}",
+            "reflectionNotes": "={{ $json.body.reflectionNotes.join(', ') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "shortSummary",
+              "displayName": "shortSummary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fullSummary",
+              "displayName": "fullSummary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "transcript",
+              "displayName": "transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "keyTopics",
+              "displayName": "keyTopics",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "people",
+              "displayName": "people",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "places",
+              "displayName": "places",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "mood",
+              "displayName": "mood",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "actionItems",
+              "displayName": "actionItems",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reflectionNotes",
+              "displayName": "reflectionNotes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "imageStatus",
+              "displayName": "imageStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "imageUrl",
+              "displayName": "imageUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        288
+      ],
+      "id": "f2e77468-1679-4c70-a2c7-728092b97a7d",
+      "name": "Update row(s)"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.jf-homelab.de",
+            "x-forwarded-scheme": "https",
+            "x-forwarded-proto": "https",
+            "x-forwarded-for": "192.168.178.100",
+            "x-real-ip": "192.168.178.100",
+            "content-length": "4123",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+            "sec-ch-ua": "\"Chromium\";v=\"148\", \"Google Chrome\";v=\"148\", \"Not/A)Brand\";v=\"99\"",
+            "content-type": "application/json",
+            "x-api-key": "deinSuperGeheimesToken123!",
+            "sec-ch-ua-mobile": "?0",
+            "accept": "*/*",
+            "origin": "https://dream-notes.jf-homelab.de",
+            "sec-fetch-site": "same-site",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-dest": "empty",
+            "referer": "https://dream-notes.jf-homelab.de/",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",
+            "priority": "u=1, i"
+          },
+          "params": {},
+          "query": {
+            "id": "17"
+          },
+          "body": {
+            "title": "Unfall in Indoorspielplatz",
+            "category": "Surrealer Traum",
+            "shortSummary": "Ein Ausflug mit der Familie im Urlaub endete in einer Indoor-Spiellandschaft, wo ein Kind unabsichtlich eingeklemmt wurde.",
+            "fullSummary": "Im Traum befand ich mich mit meinen Eltern und Geschwistern im Urlaub in einer Freizeitpark-ähnlichen Umgebung. Mein Bruder Tobi und ich verliessen kurz den Essbereich, um etwas anzusehen. Auf dem Rückweg wurden wir von einer Mitarbeiterin gezwungen, einen Umweg durch eine Kinder-Indoor-Spiellandschaft zu nehmen, statt direkt zu unserer Familie zurückzukehren. Dort rutschte Tobi versehentlich, wobei ein Kind zwischen einer Matte und der Wand eingeklemmt wurde. Das Kind wurde notversorgt, und danach versammelte sich die gesamte Familie, verwirrt über die absurde Situation.",
+            "transcript": "Tatsächlich, ich hab schon wieder geträumt, obwohl ich erst ewig lang gar nicht geträumt habe und jetzt plötzlich schon wieder. Also mein Hirn ist auf Hochtouren. Also mein Akteure waren diesmal meine Eltern, meine zwei Geschwister und wir waren irgendwie, glaube ich im Urlaub oder so. Auf jeden Fall, die Szene ging so irgendwie sind meine Eltern und meine Schwester, was hast du drin? Ich weiß nicht, am Frühstück oder irgendwie Abendessen, keine Ahnung. Und Tobi und ich sind irgendwie rausgegangen, weil wir irgendwann irgendwas suchen wollten oder irgendwas anschauen wollten, Keine Ahnung. Auf jeden Fall wollten wir dann zurück. Naja, und dieses Essen, wo wir waren, war irgendwie so ein Freizeitpark oder so oder so eine Indoor Spiellandschaft oder so. Auf jeden Fall waren wir irgendwie, war das Teil von dem Ding, wo wir gegessen haben. Kannst du dir ein bisschen vorstellen wie Ikea, wo es auch so ein Teil gibt, wo man essen kann und so ein Teil, wo man einkaufen kann. Auf jeden Fall wollten Tobi und ich dann zurück zu den anderen, weil wir, was auch immer wir gemacht hatten, keine Ahnung, erledigt hatten oder angeschaut hatten. Also es war nicht lang, das ging nur kurz raus, fünf Minuten wieder rein Und dann stand da aber eine von der Organisation von dieser Firma und meinte ah, wir können da nicht durch zu den anderen, wir können hier nur rechts abbiegen. Und da ist halt diese Kinder Indoor Spiellandschaft gewesen. Und dann war ich boah, ist ja voll blöd, Wir haben ja gesagt, wir kommen gleich wieder, jetzt können wir nicht direkt zurück. Außerdem ist ja blöd, Jetzt lassen wir Lucy quasi allein zurück, während wir in der Spiellandschaft rumspielen, weil die wollte ja später auch mitkommen, aber wir konnten halt nicht zurück. Und dann waren wir halt so zwei in dieser Spiellandschaft und sind irgendwie vorgehüpft und so und da irgendwie rumgesprungen und dann hat irgendwie Tobi so ein Kind irgendwie hinter so einer Matte versehentlich eingeklemmt, als er irgendwie da rumgerutscht ist und der wusste nicht, dass er ein Kind ist. Und dann war ein Kind zwischen Matte und Wand eingeklemmt und dann wurde dieses Kind irgendwie Notfall versorgt von was weiß ich wem. Also dem ging es nicht schlecht schlecht, aber wurde halt bisschen eingematscht, hat halt geweint aber es war nichts Schlimmes, irgendwie lebensgefährliches. Und dann war der Stadtwidr irgendwie rum und weil halt dann irgendwie dieser Einsatz, also dieser Notfall war, kamen dann irgendwie alle Menschen so und auch Lucy und Mama und Papa, glaube ich, keine Ahnung, damals auf jeden Fall zu Ende, standen einfach lost rum und waren dann so, nein, wie konnte das passieren? Das ist doch jetzt irgendwie blöd gelaufen. Wir wollten doch gar nicht in Indoor Spielplatz. Also sehr random, aber irgendwie ein lustiger Ort für eine Traumlocation.",
+            "keyTopics": [
+              "Indoorspielplatz",
+              "Familie",
+              "Unfall",
+              "Umleitung",
+              "Kind eingeklemmt"
+            ],
+            "people": [
+              "Eltern",
+              "Tobi",
+              "Lucy"
+            ],
+            "places": [
+              "Urlaubsort",
+              "Freizeitpark (ähnlich Ikea)",
+              "Indoor-Spiellandschaft"
+            ],
+            "mood": [
+              "Verwirrung",
+              "Stress",
+              "Schock"
+            ],
+            "actionItems": [],
+            "reflectionNotes": [
+              "Gefühle der Ohnmacht bei unerwarteten Hindernissen.",
+              "Sorge um die Familie und unschuldige Dritte.",
+              "Kontrollverlust in einer als sicher geglaubten Umgebung. test"
+            ]
+          },
+          "webhookUrl": "http://192.168.178.181:5678/webhook/notes",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delete row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        []
+      ]
+    },
+    "Delete row(s)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row(s)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "77c782c2-2007-40c0-80f6-1d6641a90a13",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3917c4d02d4a9fedbfcaf6014cef23dc4747c84dbe376786c9e3df9c2b1163d6"
+  },
+  "id": "Z3g07rZHdjZdiUUi",
+  "tags": []
+}

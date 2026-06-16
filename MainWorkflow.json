@@ -1,0 +1,1024 @@
+{
+  "name": "Main",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -240,
+        384
+      ],
+      "id": "b12cbf8e-b19f-496c-817d-6a927c527fd1",
+      "name": "Webhook",
+      "webhookId": "e80e6f42-4151-43f9-bfef-cceefd20d19b"
+    },
+    {
+      "parameters": {
+        "url": "={{$json.body.MediaUrl0}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        288
+      ],
+      "id": "25d4d25b-9989-4ac2-a1de-d6c5d8f73219",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "qS12A33FDQ58J5wC",
+          "name": "Teilio"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.content.parts[0].text\n\nlet cleaned = raw\n  .replace(/```json/g, \"\")\n  .replace(/```/g, \"\")\n  .trim();\n\nconst parsed = JSON.parse(cleaned);\n\nreturn [\n  {\n    json: {\n      ...parsed,\n      imageStatus: \"pending\",\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        192
+      ],
+      "id": "d6741971-289d-44c3-a762-86934a9d4702",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "4ZWt3MvfvNSpwpqb",
+          "mode": "list",
+          "cachedResultName": "voice_notes_table",
+          "cachedResultUrl": "/projects/eZeMgf4u98eUuqvx/datatables/4ZWt3MvfvNSpwpqb"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.title }}",
+            "category": "={{ $json.category }}",
+            "shortSummary": "={{ $json.shortSummary }}",
+            "fullSummary": "={{ $json.fullSummary }}",
+            "people": "={{ JSON.stringify($json.people) }}\n",
+            "places": "={{ JSON.stringify($json.places) }}",
+            "mood": "={{ JSON.stringify($json.mood) }}",
+            "actionItems": "={{ JSON.stringify($json.actionItems) }}",
+            "reflectionNotes": "={{ JSON.stringify($json.reflectionNotes) }}",
+            "imageStatus": "={{ $json.imageStatus }}",
+            "transcript": "={{ $('If1').item.json.text }}",
+            "keyTopics": "={{ JSON.stringify($json.keyTopics) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "shortSummary",
+              "displayName": "shortSummary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fullSummary",
+              "displayName": "fullSummary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "transcript",
+              "displayName": "transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "keyTopics",
+              "displayName": "keyTopics",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "people",
+              "displayName": "people",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "places",
+              "displayName": "places",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "mood",
+              "displayName": "mood",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "actionItems",
+              "displayName": "actionItems",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reflectionNotes",
+              "displayName": "reflectionNotes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "imageStatus",
+              "displayName": "imageStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "imageUrl",
+              "displayName": "imageUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1904,
+        192
+      ],
+      "id": "cb542a7d-b619-4d75-ba1c-7cf7d78ed4b7",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.MessageType }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "0aaf85cc-c8f4-4437-85c4-512abc34be2e"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a89cbffb-7322-4c38-bde9-4470720c0c81",
+                    "leftValue": "={{ $json.body.MessageType }}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        384
+      ],
+      "id": "49c929cb-488a-4f85-8dda-ffb0619f8d26",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileInput": "data"
+      },
+      "type": "n8n-nodes-assemblyai.assemblyAi",
+      "typeVersion": 1,
+      "position": [
+        432,
+        384
+      ],
+      "id": "58f07574-608e-415a-96dc-144a20b439bb",
+      "name": "Upload a file",
+      "credentials": {
+        "assemblyAiApi": {
+          "id": "Okh1IuLkqYECDZIP",
+          "name": "AssemblyAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "audioUrl": "={{ $json.upload_url }}",
+        "additionalFields": {
+          "speech_models": "universal"
+        }
+      },
+      "type": "n8n-nodes-assemblyai.assemblyAi",
+      "typeVersion": 1,
+      "position": [
+        656,
+        384
+      ],
+      "id": "ac947854-b61e-4172-9554-aa3df2df906b",
+      "name": "Create a transcription",
+      "credentials": {
+        "assemblyAiApi": {
+          "id": "Okh1IuLkqYECDZIP",
+          "name": "AssemblyAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "transcriptId": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-assemblyai.assemblyAi",
+      "typeVersion": 1,
+      "position": [
+        880,
+        384
+      ],
+      "id": "d204e0e8-68df-4137-976d-19ed40cd2f2c",
+      "name": "Get a transcription",
+      "credentials": {
+        "assemblyAiApi": {
+          "id": "Okh1IuLkqYECDZIP",
+          "name": "AssemblyAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1392,
+        480
+      ],
+      "id": "ed6f7f2d-22fa-4b5c-9107-addd035cd38f",
+      "name": "Wait",
+      "webhookId": "88c5e0b5-a032-4aed-bf70-ab697dc3f13b"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e26663e0-319c-439f-acc9-d717a6058c87",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1104,
+        320
+      ],
+      "id": "00c06aa8-f05f-43b8-8df1-258633757390",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "from": "=+14155238886",
+        "to": "+4915755852165",
+        "toWhatsapp": true,
+        "message": "=🎙️ Sprachaufnahme erhalten ({{ $binary.data.fileSize || \"unbekannte Größe\" }}) Transkription läuft...",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        432,
+        192
+      ],
+      "id": "fde21585-e934-4765-af19-a94e796570c2",
+      "name": "To WA: Sprachaufnahme erhalten",
+      "credentials": {
+        "twilioApi": {
+          "id": "nXLj57qSj2J6cOor",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "=+14155238886",
+        "to": "+4915755852165",
+        "toWhatsapp": true,
+        "message": "❌ Fehler: Es wurde kein Audio gesendet.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        208,
+        480
+      ],
+      "id": "d765af2d-d051-4328-b221-b0ac9ede7a03",
+      "name": "To WA: Media Fehler",
+      "credentials": {
+        "twilioApi": {
+          "id": "nXLj57qSj2J6cOor",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "=+14155238886",
+        "to": "+4915755852165",
+        "toWhatsapp": true,
+        "message": "=✅ Transkription fertig. Starte Analyse",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        112
+      ],
+      "id": "334a33e5-803b-4652-a003-fb240da5475d",
+      "name": "To WA: Transkription fertig",
+      "credentials": {
+        "twilioApi": {
+          "id": "nXLj57qSj2J6cOor",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "=+14155238886",
+        "to": "+4915755852165",
+        "toWhatsapp": true,
+        "message": "❌ Fehler:  $input.second()",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        384
+      ],
+      "id": "90c9dc90-2541-4eaf-b457-f1fd80d424f6",
+      "name": "Fehler: Gemini",
+      "credentials": {
+        "twilioApi": {
+          "id": "nXLj57qSj2J6cOor",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "=+14155238886",
+        "to": "+4915755852165",
+        "toWhatsapp": true,
+        "message": "=✅ Dein Traum  \"{{ $json.title }}\" wurde erstellt und kann unter https://dream-notes.jf-homelab.de/ abgerufen werden.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        2128,
+        96
+      ],
+      "id": "3dbc6124-4d14-44dc-8396-52d70d98c087",
+      "name": "To WA: Dein Traum wurde erstellt.",
+      "credentials": {
+        "twilioApi": {
+          "id": "nXLj57qSj2J6cOor",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Strukturiere die folgende persönliche Sprachnotiz eines Traums als JSON. Die Sprachnotiz ist immer auf Deutsch.\n\nWICHTIG:\n- Gib ausschließlich valides JSON zurück (kein Text davor oder danach)\n- Verwende klare, kurze Formulierungen\n- Keine Erklärungen, nur Daten\n- Alle Texte auf Deutsch\n\nFORMAT:\n{\n  \"title\": \"string (kurz, max. 6 Wörter)\",\n  \"category\": \"string (eine Kategorie, z. B. 'Angsttraum', 'Alltagstraum', 'Surrealer Traum', 'Verfolgung', 'Sozialer Traum')\",\n  \"shortSummary\": \"string (1 Satz, max. 20 Wörter)\",\n  \"fullSummary\": \"string (3–5 Sätze, klar und verständlich)\",\n  \"keyTopics\": [\"max. 5 konkrete Stichwörter\"],\n  \"people\": [\"nur reale oder klar identifizierbare Personen, max. 5\"],\n  \"places\": [\"konkrete Orte oder Umgebungen, max. 5\"],\n  \"mood\": [\"max. 3 Emotionen (z. B. Angst, Freude, Stress, Verwirrung, Neugier)\"],\n  \"actionItems\": [\"nur wenn sinnvoll, sonst leeres Array\"],\n  \"reflectionNotes\": [\"max. 3 kurze Interpretationsansätze oder Gedanken\"]\n}\n\nREGELN:\n- keyTopics: konkret (z. B. \"Flugzeugabsturz\", nicht \"Ereignis\")\n- mood: nur Emotionen, keine Sätze\n- people: keine erfundenen Kategorien wie \"Menschen\"\n- places: möglichst spezifisch (z. B. \"Schule\", \"Flugzeug\", \"Bundestag\")\n- actionItems: nur wenn sich etwas Konkretes daraus ableiten lässt\n- reflectionNotes: kurze, vorsichtige Interpretation (keine Faktenbehauptung)\n\nWenn Informationen fehlen:\n→ verwende ein leeres Array [] oder einen sinnvollen Default-Wert\n\nTranskript:\n{{ $json.text }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        1328,
+        336
+      ],
+      "id": "b2189735-3ab7-47cf-a633-190dfb079099",
+      "name": "Message a model",
+      "retryOnFail": true,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hjszkkSpBvC3i9o1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-image",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-image (Nano Banana)"
+        },
+        "prompt": "=Create a dreamlike cinematic image based on this dream summary. No text, no letters, no captions. Slightly surreal, atmospheric, soft light.\n\nDream summary:\n{{ $json.fullSummary }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        2128,
+        288
+      ],
+      "id": "879e6307-b846-4420-8b54-ba3872d50152",
+      "name": "Generate an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hjszkkSpBvC3i9o1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "=+14155238886",
+        "to": "+4915755852165",
+        "toWhatsapp": true,
+        "message": "=✅ Bild wurde hizugefügt.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        2800,
+        288
+      ],
+      "id": "0ae894e5-7ab2-46a9-b612-0e352c9cde62",
+      "name": "To WA: Bildgenerierung wird gestartet.1",
+      "credentials": {
+        "twilioApi": {
+          "id": "nXLj57qSj2J6cOor",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "4ZWt3MvfvNSpwpqb",
+          "mode": "list",
+          "cachedResultName": "voice_notes_table",
+          "cachedResultUrl": "/projects/eZeMgf4u98eUuqvx/datatables/4ZWt3MvfvNSpwpqb"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $('Insert row').item.json.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "imageUrl": "=https://pub-60c33f170e8e4b869304882705571b94.r2.dev/dream-{{ $('Insert row').item.json.id }}.png",
+            "imageStatus": "ready"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "shortSummary",
+              "displayName": "shortSummary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fullSummary",
+              "displayName": "fullSummary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "transcript",
+              "displayName": "transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "keyTopics",
+              "displayName": "keyTopics",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "people",
+              "displayName": "people",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "places",
+              "displayName": "places",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "mood",
+              "displayName": "mood",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "actionItems",
+              "displayName": "actionItems",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reflectionNotes",
+              "displayName": "reflectionNotes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "imageStatus",
+              "displayName": "imageStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "imageUrl",
+              "displayName": "imageUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2576,
+        288
+      ],
+      "id": "fb0bcc53-d0cd-40a7-8b14-1861c15794be",
+      "name": "Upsert row(s)"
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "dream-images",
+        "fileName": "=dream-{{ $('Insert row').item.json.id }}.png",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.s3",
+      "typeVersion": 1,
+      "position": [
+        2352,
+        288
+      ],
+      "id": "f1b3299b-b6de-47a7-ae69-ab4fe1d0e332",
+      "name": "Upload a file1",
+      "credentials": {
+        "s3": {
+          "id": "kvqTFjlBYvTo4Eg4",
+          "name": "S3 account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "com.twilio.messaging.inbound-message.received"
+        ]
+      },
+      "type": "n8n-nodes-base.twilioTrigger",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        0
+      ],
+      "id": "eaa69a07-7e3a-472f-8e85-ab5b16b18a06",
+      "name": "Twilio Trigger",
+      "webhookId": "aa096953-d967-455c-a89d-8c8f25fad2c2",
+      "credentials": {
+        "twilioApi": {
+          "id": "nXLj57qSj2J6cOor",
+          "name": "Twilio account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Upload a file",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "To WA: Sprachaufnahme erhalten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "To WA: Media Fehler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        [
+          {
+            "node": "To WA: Dein Traum wurde erstellt.",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload a file": {
+      "main": [
+        [
+          {
+            "node": "Create a transcription",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a transcription": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "To WA: Transkription fertig",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get a transcription",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a transcription": {
+      "main": [
+        [
+          {
+            "node": "Get a transcription",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler: Gemini",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate an image": {
+      "main": [
+        [
+          {
+            "node": "Upload a file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert row(s)": {
+      "main": [
+        [
+          {
+            "node": "To WA: Bildgenerierung wird gestartet.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload a file1": {
+      "main": [
+        [
+          {
+            "node": "Upsert row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c43ce3f6-37a0-4edb-b8a8-87b381bdebba",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3917c4d02d4a9fedbfcaf6014cef23dc4747c84dbe376786c9e3df9c2b1163d6"
+  },
+  "id": "JQez9RpcizthmgC5",
+  "tags": []
+}
