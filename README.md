@@ -33,6 +33,14 @@ Frontend
 /webhook/notes
 ```
 
+Ein passendes Frontend kann aus diesem separaten Repository bezogen werden:
+
+```text
+https://github.com/JakobFischer2574/dream-notes
+```
+
+Die n8n-Workflows und das Frontend sind damit getrennt: Dieses Repository enthält die Automatisierung und API-Schicht, das Frontend-Repository enthält die Weboberfläche.
+
 ---
 
 ## 2. Voraussetzungen
@@ -46,7 +54,7 @@ Du brauchst:
 | AssemblyAI | Transkription der Audiodateien |
 | Google Gemini API | JSON-Analyse des Traums und Bildgenerierung |
 | S3-kompatibler Speicher, z. B. Cloudflare R2 | Speicherung der generierten Bilder |
-| Frontend | Ruft die Notes-API auf |
+| Frontend | Ruft die Notes-API auf; verfügbar unter `https://github.com/JakobFischer2574/dream-notes` |
 
 Zusätzlich muss n8n von außen erreichbar sein, idealerweise über HTTPS, damit Twilio und das Frontend die Webhooks erreichen können.
 
@@ -315,6 +323,8 @@ Testablauf:
 4. n8n sollte die Audiodatei herunterladen, transkribieren, analysieren und eine neue Zeile in `voice_notes_table` erstellen.
 5. Danach sollte das Frontend die neue Notiz über die Notes-API lesen können.
 
+Hinweis: Der Node `Twilio Trigger` ist im exportierten Main Workflow vorhanden, aber nicht mit dem restlichen Workflow verbunden. Für den aktuellen Ablauf ist der normale Webhook-Node `POST /webhook/whatsapp` der relevante Einstiegspunkt.
+
 ---
 
 ## 7. Frontend-API
@@ -556,7 +566,52 @@ Danach am besten die Liste erneut mit `GET /webhook/notes` laden.
 
 ---
 
-## 9. Empfohlene Frontend-Umgebungsvariablen
+## 9. Frontend aus dem separaten Repo starten
+
+Das Frontend liegt in einem eigenen GitHub-Repository:
+
+```text
+https://github.com/JakobFischer2574/dream-notes
+```
+
+Schnellstart:
+
+```bash
+git clone https://github.com/JakobFischer2574/dream-notes.git
+cd dream-notes
+npm install
+```
+
+Lege anschließend im Frontend eine `.env`-Datei an. Wichtig sind vor allem die URL zu deiner n8n-Instanz und der API-Key aus dem Header-Auth-Credential des `APIs.json`-Workflows:
+
+```env
+VITE_N8N_API_URL=https://<deine-n8n-domain>
+VITE_N8N_API_KEY=<DEIN_API_KEY>
+```
+
+Danach kannst du das Frontend lokal starten:
+
+```bash
+npm run dev
+```
+
+Die API-Basis im Frontend sollte auf diesen Endpoint zeigen:
+
+```text
+https://<deine-n8n-domain>/webhook/notes
+```
+
+Für lokale n8n-Tests kann stattdessen die Test-URL verwendet werden:
+
+```text
+https://<deine-n8n-domain>/webhook-test/notes
+```
+
+Wenn das Frontend produktiv deployed wird, müssen dieselben Umgebungsvariablen beim Hoster gesetzt werden.
+
+---
+
+## 10. Empfohlene Frontend-Umgebungsvariablen
 
 Beispiel für `.env`:
 
@@ -634,7 +689,45 @@ export async function deleteNote(id) {
 
 ---
 
-## 10. Quick Start Checkliste
+## 11. Wichtig: Array-Felder sauber speichern
+
+Für das Frontend sind diese Felder Arrays:
+
+```text
+keyTopics
+people
+places
+mood
+actionItems
+reflectionNotes
+```
+
+Damit sie beim Abrufen auch wieder als Arrays zurückkommen, sollten sie in der Data Table als JSON-String gespeichert werden.
+
+Empfohlene n8n-Expression für diese Felder:
+
+```js
+{{ JSON.stringify($json.body.keyTopics) }}
+```
+
+statt:
+
+```js
+{{ $json.body.keyTopics.join(', ') }}
+```
+
+Das ist besonders wichtig in `APIs.json` bei:
+
+```text
+Insert row
+Update row(s)
+```
+
+Wenn du `join(', ')` verwendest, werden die Daten zwar lesbar gespeichert, aber beim späteren `JSON.parse(...)` nicht zuverlässig wieder zu Arrays.
+
+---
+
+## 12. Quick Start Checkliste
 
 1. `MainWorkflow.json` und `APIs.json` in n8n importieren.
 2. Data Table `voice_notes_table` mit allen Spalten erstellen.
@@ -650,12 +743,13 @@ export async function deleteNote(id) {
 6. Public Image URL im Node `Upsert row(s)` anpassen.
 7. Beide Workflows aktivieren.
 8. Twilio Incoming Webhook auf `/webhook/whatsapp` setzen.
-9. WhatsApp-Audio senden und prüfen, ob eine neue Zeile in der Data Table entsteht.
-10. Frontend mit `/webhook/notes` verbinden.
+9. Frontend aus `https://github.com/JakobFischer2574/dream-notes` klonen und `.env` setzen.
+10. WhatsApp-Audio senden und prüfen, ob eine neue Zeile in der Data Table entsteht.
+11. Frontend mit `/webhook/notes` verbinden und `GET /webhook/notes` testen.
 
 ---
 
-## 11. Häufige Fehler
+## 13. Häufige Fehler
 
 ### `401 Unauthorized` beim Frontend
 
@@ -664,6 +758,17 @@ Der Header fehlt oder ist falsch:
 ```http
 x-api-key: <DEIN_API_KEY>
 ```
+
+### Frontend erreicht die API nicht
+
+Prüfe im Frontend die `.env`-Werte:
+
+```env
+VITE_N8N_API_URL=https://<deine-n8n-domain>
+VITE_N8N_API_KEY=<DEIN_API_KEY>
+```
+
+Die URL darf normalerweise nicht direkt `/webhook/notes` enthalten, wenn der Code bereits selbst `/webhook/notes` anhängt. Sonst entsteht versehentlich eine doppelte URL wie `/webhook/notes/webhook/notes`.
 
 ### WhatsApp-Audio wird nicht heruntergeladen
 
@@ -695,7 +800,7 @@ Dateiname dream-<id>.png
 
 ---
 
-## 12. Sicherheit
+## 14. Sicherheit
 
 Keine echten Tokens, Telefonnummern oder Secrets in das Repository committen.
 
