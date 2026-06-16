@@ -1,107 +1,103 @@
 # Dream Notes n8n Workflows
 
-Dieses Repository enthält zwei n8n-Workflows für eine kleine Dream-Notes-App:
+Dieses Repository enthält die n8n-Workflows für die Dream-Notes-App. Die eigentliche Weboberfläche liegt in einem separaten Frontend-Repository:
 
 ```text
-MainWorkflow.json   # WhatsApp → Audio → Transkript → KI-Analyse → Data Table → Bildgenerierung
-APIs.json           # REST-API für das Frontend: Notizen lesen, erstellen, bearbeiten, löschen
+https://github.com/JakobFischer2574/dream-notes
 ```
 
-Der Fokus dieser README liegt nicht auf der internen Logik jedes Nodes, sondern darauf, die Workflows möglichst schnell in n8n zu importieren, mit Credentials zu verbinden und vom Frontend aus nutzbar zu machen.
+Dieses Repo ist deshalb vor allem dafür gedacht, die Backend-Automatisierung in n8n schnell einzurichten:
 
----
+```text
+MainWorkflow.json   # WhatsApp-Sprachnachricht → Transkript → KI-Analyse → Data Table → Bild
+APIs.json           # API-Schicht für das vorhandene Frontend
+```
 
-## 1. Architektur in Kurzform
+Der Fokus dieser README liegt nicht auf der internen Node-Logik und auch nicht auf einer vollständigen API-Dokumentation. Ziel ist, die beiden Workflows möglichst schnell mit den richtigen Credentials zum Laufen zu bringen und sie mit dem bestehenden Frontend zu verbinden.
+
+\---
+
+## 1\. Gesamtarchitektur
 
 ```text
 WhatsApp-Sprachnachricht
         ↓
 MainWorkflow.json
         ↓
-n8n Data Table: voice_notes_table
+n8n Data Table: voice\_notes\_table
         ↓
 APIs.json
         ↓
-Frontend
+Frontend: github.com/JakobFischer2574/dream-notes
 ```
 
-`MainWorkflow.json` verarbeitet WhatsApp-Audios: Audio herunterladen, transkribieren, mit Gemini strukturieren, in einer n8n Data Table speichern und optional ein Bild generieren.
+Der Main Workflow verarbeitet neue WhatsApp-Sprachnachrichten. Er lädt das Audio herunter, erstellt ein Transkript, lässt den Traum durch Gemini strukturieren, speichert die Notiz in einer n8n Data Table und generiert optional ein Bild.
 
-`APIs.json` stellt die gespeicherten Dream Notes für ein Frontend bereit. Das Frontend spricht nur diesen Workflow an:
+Der API Workflow stellt die gespeicherten Dream Notes für das Frontend bereit. Das Frontend muss daher nicht direkt mit der Data Table sprechen, sondern nur mit dem API Workflow in n8n.
 
-```text
-/webhook/notes
-```
+\---
 
-Ein passendes Frontend kann aus diesem separaten Repository bezogen werden:
+## 2\. Voraussetzungen
 
-```text
-https://github.com/JakobFischer2574/dream-notes
-```
+Du brauchst folgende Dienste und Zugänge:
 
-Die n8n-Workflows und das Frontend sind damit getrennt: Dieses Repository enthält die Automatisierung und API-Schicht, das Frontend-Repository enthält die Weboberfläche.
+|Dienst|Zweck|
+|-|-|
+|n8n|Workflow-Ausführung und Data Table|
+|Twilio WhatsApp|Empfang und Versand von WhatsApp-Nachrichten|
+|AssemblyAI|Transkription der Audiodateien|
+|Google Gemini API|Strukturierte Traum-Analyse und Bildgenerierung|
+|S3-kompatibler Speicher, z. B. Cloudflare R2|Speicherung der generierten Bilder|
+|Frontend-Repo|Weboberfläche für die Dream Notes|
 
----
+Zusätzlich sollte deine n8n-Instanz von außen erreichbar sein, idealerweise über HTTPS. Das ist wichtig, damit Twilio und das Frontend die n8n-Webhooks erreichen können.
 
-## 2. Voraussetzungen
+\---
 
-Du brauchst:
-
-| Dienst | Wofür? |
-|---|---|
-| n8n | Workflow-Ausführung und Data Table |
-| Twilio WhatsApp | Empfang und Versand von WhatsApp-Nachrichten |
-| AssemblyAI | Transkription der Audiodateien |
-| Google Gemini API | JSON-Analyse des Traums und Bildgenerierung |
-| S3-kompatibler Speicher, z. B. Cloudflare R2 | Speicherung der generierten Bilder |
-| Frontend | Ruft die Notes-API auf; verfügbar unter `https://github.com/JakobFischer2574/dream-notes` |
-
-Zusätzlich muss n8n von außen erreichbar sein, idealerweise über HTTPS, damit Twilio und das Frontend die Webhooks erreichen können.
-
----
-
-## 3. Workflows in n8n importieren
+## 3\. Workflows in n8n importieren
 
 1. n8n öffnen.
 2. Neuen Workflow erstellen.
 3. `Import from File` oder `Import from JSON` auswählen.
-4. Zuerst `MainWorkflow.json` importieren.
-5. Danach `APIs.json` importieren.
-6. Beide Workflows zunächst deaktiviert lassen, bis alle Credentials und Tabellen korrekt gesetzt sind.
+4. `MainWorkflow.json` importieren.
+5. `APIs.json` importieren.
+6. Beide Workflows zunächst deaktiviert lassen.
+7. Danach zuerst Data Table und Credentials einrichten.
+8. Erst anschließend beide Workflows aktivieren.
 
-Nach dem Import enthalten die Nodes zwar Credential-Namen, aber nicht die echten Secrets. Die Credentials müssen in deiner n8n-Instanz neu angelegt oder den Nodes neu zugewiesen werden.
+Nach dem Import sind die Credential-Verweise aus der ursprünglichen n8n-Instanz noch vorhanden, aber die echten Secrets werden nicht mit exportiert. Du musst die Credentials daher in deiner eigenen n8n-Instanz neu anlegen oder neu zuweisen.
 
----
+\---
 
-## 4. Data Table anlegen
+## 4\. Data Table anlegen
 
 Lege in n8n eine Data Table mit dem Namen an:
 
 ```text
-voice_notes_table
+voice\_notes\_table
 ```
 
-Die Tabelle sollte folgende Spalten besitzen:
+Die Tabelle sollte diese Spalten enthalten:
 
-| Spalte | Typ |
-|---|---|
-| title | string |
-| category | string |
-| shortSummary | string |
-| fullSummary | string |
-| transcript | string |
-| keyTopics | string |
-| people | string |
-| places | string |
-| mood | string |
-| actionItems | string |
-| reflectionNotes | string |
-| imageStatus | string |
-| imageUrl | string |
+|Spalte|Typ|
+|-|-|
+|title|string|
+|category|string|
+|shortSummary|string|
+|fullSummary|string|
+|transcript|string|
+|keyTopics|string|
+|people|string|
+|places|string|
+|mood|string|
+|actionItems|string|
+|reflectionNotes|string|
+|imageStatus|string|
+|imageUrl|string|
 
-Die Array-Felder werden in der Tabelle als String gespeichert. Im `MainWorkflow.json` werden sie mit `JSON.stringify(...)` gespeichert. Im `APIs.json` werden sie beim Auslesen wieder zu echten Arrays geparst.
+Die Felder `keyTopics`, `people`, `places`, `mood`, `actionItems` und `reflectionNotes` sind fachlich Arrays. Da n8n Data Tables hier mit String-Feldern arbeiten, werden diese Werte als JSON-String gespeichert und beim Abruf durch den API Workflow wieder in Arrays umgewandelt.
 
-Wichtig: Nach dem Import musst du in allen Data-Table-Nodes die neu angelegte Tabelle auswählen, weil die exportierte interne Table-ID aus einer anderen n8n-Instanz stammt.
+Nach dem Import musst du in allen Data-Table-Nodes deine neu angelegte Tabelle auswählen. Die exportierte interne Table-ID aus der ursprünglichen n8n-Instanz funktioniert in deiner Instanz nicht automatisch.
 
 Betroffene Nodes:
 
@@ -117,11 +113,11 @@ APIs.json:
 - Delete row(s)
 ```
 
----
+\---
 
-## 5. Credentials einrichten
+## 5\. Credentials einrichten
 
-### 5.1 Twilio API Credential
+### 5.1 Twilio API
 
 Wird für WhatsApp-Nachrichten verwendet.
 
@@ -132,9 +128,9 @@ Credential type: Twilio API
 Name: Twilio account
 ```
 
-Danach dieses Credential in allen Twilio-Nodes auswählen.
+Danach dieses Credential in allen Twilio-Nodes im Main Workflow auswählen.
 
-Betroffene Nodes im Main Workflow:
+Betroffene Nodes:
 
 ```text
 To WA: Sprachaufnahme erhalten
@@ -145,44 +141,35 @@ To WA: Dein Traum wurde erstellt.
 To WA: Bildgenerierung wird gestartet.1
 ```
 
-Passe außerdem in diesen Nodes die Telefonnummern an:
+Passe in diesen Nodes außerdem die Telefonnummern an:
 
 ```text
 from: deine Twilio-WhatsApp-Nummer
 to: deine Ziel-WhatsApp-Nummer
 ```
 
-Beispiel:
-
-```text
-from: whatsapp:+14155238886
-to: whatsapp:+49...
-```
-
-Je nach n8n/Twilio-Konfiguration kann das Feld auch mit `toWhatsapp: true` arbeiten. Entscheidend ist, dass Sender- und Empfängernummer zu deinem Twilio-Setup passen.
-
----
+\---
 
 ### 5.2 HTTP Basic Auth für Twilio-Media-Download
 
-Der Node `HTTP Request` lädt die von Twilio bereitgestellte Audiodatei herunter.
+Der Node `HTTP Request` lädt die Audiodatei herunter, die Twilio als Media-URL bereitstellt.
 
 In n8n anlegen:
 
 ```text
 Credential type: HTTP Basic Auth
 Name: Twilio Media Basic Auth
-Username: TWILIO_ACCOUNT_SID
-Password: TWILIO_AUTH_TOKEN
+Username: TWILIO\_ACCOUNT\_SID
+Password: TWILIO\_AUTH\_TOKEN
 ```
 
-Dann im Node `HTTP Request` dieses Credential auswählen.
+Dieses Credential anschließend im Node `HTTP Request` auswählen.
 
----
+\---
 
-### 5.3 AssemblyAI Credential
+### 5.3 AssemblyAI
 
-Wird für die Transkription der Audiodatei verwendet.
+Wird für die Transkription der Audiodateien verwendet.
 
 In n8n anlegen:
 
@@ -200,13 +187,13 @@ Create a transcription
 Get a transcription
 ```
 
-Falls der AssemblyAI-Node in deiner n8n-Instanz fehlt, muss das entsprechende Community Node Package installiert werden.
+Falls der AssemblyAI-Node in deiner n8n-Instanz fehlt, muss das passende Community Node Package installiert werden.
 
----
+\---
 
-### 5.4 Google Gemini Credential
+### 5.4 Google Gemini
 
-Wird für die strukturierte Traum-Analyse und die Bildgenerierung verwendet.
+Wird für die strukturierte Traum-Analyse und für die Bildgenerierung verwendet.
 
 In n8n anlegen:
 
@@ -223,7 +210,7 @@ Message a model
 Generate an image
 ```
 
-Verwendete Modelle im Workflow:
+Im Workflow sind diese Modelle vorgesehen:
 
 ```text
 models/gemini-2.5-flash
@@ -232,11 +219,11 @@ models/gemini-2.5-flash-image
 
 Falls diese Modelle in deiner Umgebung nicht verfügbar sind, wähle im jeweiligen Node ein verfügbares Gemini-Modell aus.
 
----
+\---
 
-### 5.5 S3 / Cloudflare R2 Credential
+### 5.5 S3 / Cloudflare R2
 
-Wird verwendet, um generierte Bilder hochzuladen.
+Wird verwendet, um die generierten Bilder hochzuladen.
 
 In n8n anlegen:
 
@@ -261,17 +248,13 @@ Im Workflow ist als Bucket vorgesehen:
 dream-images
 ```
 
-Passe außerdem im Node `Upsert row(s)` die öffentliche Bild-URL an:
+Passe außerdem im Node `Upsert row(s)` die öffentliche Bild-URL an. Dort muss deine öffentlich erreichbare Bucket-URL stehen, damit das Frontend die generierten Bilder anzeigen kann.
 
-```text
-https://<deine-public-bucket-domain>/dream-{{ $('Insert row').item.json.id }}.png
-```
+\---
 
----
+### 5.6 Header Auth für das Frontend
 
-### 5.6 Header Auth für die Frontend-API
-
-Der `APIs.json`-Workflow ist über Header Auth geschützt.
+Der API Workflow ist durch Header Auth geschützt.
 
 In n8n anlegen:
 
@@ -282,19 +265,13 @@ Header Name: x-api-key
 Header Value: ein langes geheimes Token
 ```
 
-Das Frontend muss diesen Header bei jedem Request mitsenden:
+Diesen API-Key trägst du später im Frontend als Umgebungsvariable ein. Er sollte nicht direkt in den Quellcode geschrieben werden.
 
-```http
-x-api-key: <DEIN_API_KEY>
-```
+\---
 
-Speichere den API-Key im Frontend nicht hart im Code, sondern über eine Umgebungsvariable.
+## 6\. Main Workflow: WhatsApp verbinden
 
----
-
-## 6. Main Workflow: WhatsApp-Webhook einrichten
-
-Der Main Workflow verwendet diesen Webhook:
+Der Einstiegspunkt für WhatsApp ist der Webhook im Main Workflow:
 
 ```text
 POST /webhook/whatsapp
@@ -306,275 +283,54 @@ Die vollständige Production-URL sieht typischerweise so aus:
 https://<deine-n8n-domain>/webhook/whatsapp
 ```
 
-In Twilio musst du diese URL als Incoming-Message-Webhook für WhatsApp eintragen.
-
-Erwartet wird ein Twilio-Webhook-Body mit unter anderem:
-
-```text
-MessageType=audio
-MediaUrl0=<URL der Audiodatei>
-```
+Diese URL muss in Twilio als Incoming-Message-Webhook für WhatsApp eingetragen werden.
 
 Testablauf:
 
-1. Workflow aktivieren.
-2. Twilio WhatsApp Sandbox oder produktive WhatsApp-Nummer konfigurieren.
-3. WhatsApp-Sprachnachricht an die Twilio-Nummer senden.
-4. n8n sollte die Audiodatei herunterladen, transkribieren, analysieren und eine neue Zeile in `voice_notes_table` erstellen.
-5. Danach sollte das Frontend die neue Notiz über die Notes-API lesen können.
+1. Main Workflow aktivieren.
+2. Twilio WhatsApp Sandbox oder produktive Twilio-WhatsApp-Nummer konfigurieren.
+3. Eine WhatsApp-Sprachnachricht an die Twilio-Nummer senden.
+4. Prüfen, ob n8n eine neue Zeile in `voice\_notes\_table` erstellt.
+5. Prüfen, ob nach kurzer Zeit auch `imageStatus` und `imageUrl` gesetzt werden.
+6. Danach im Frontend prüfen, ob die neue Dream Note angezeigt wird.
 
-Hinweis: Der Node `Twilio Trigger` ist im exportierten Main Workflow vorhanden, aber nicht mit dem restlichen Workflow verbunden. Für den aktuellen Ablauf ist der normale Webhook-Node `POST /webhook/whatsapp` der relevante Einstiegspunkt.
+Hinweis: Im exportierten Main Workflow gibt es zusätzlich einen `Twilio Trigger`-Node. Für den hier beschriebenen Ablauf ist aber der normale Webhook-Node `POST /webhook/whatsapp` der relevante Einstiegspunkt.
 
----
+\---
 
-## 7. Frontend-API
+## 7\. API Workflow mit dem Frontend verbinden
 
-Das Frontend spricht den Workflow aus `APIs.json` an.
-
-Basis-URL:
-
-```text
-https://<deine-n8n-domain>/webhook/notes
-```
-
-Für lokale Tests in n8n kann die Test-URL je nach n8n-Instanz so aussehen:
-
-```text
-https://<deine-n8n-domain>/webhook-test/notes
-```
-
-Jeder Request braucht den API-Key:
-
-```http
-x-api-key: <DEIN_API_KEY>
-```
-
-Für Requests mit Body zusätzlich:
-
-```http
-Content-Type: application/json
-```
-
----
-
-## 8. API-Endpunkte
-
-### 8.1 Alle Notes abrufen
-
-```http
-GET /webhook/notes
-```
-
-Beispiel mit `fetch`:
-
-```js
-const response = await fetch(`${N8N_API_URL}/webhook/notes`, {
-  method: "GET",
-  headers: {
-    "x-api-key": import.meta.env.VITE_N8N_API_KEY,
-  },
-});
-
-const notes = await response.json();
-```
-
-Antwort:
-
-```json
-[
-  {
-    "id": 17,
-    "title": "Unfall in Indoorspielplatz",
-    "category": "Surrealer Traum",
-    "shortSummary": "Ein Ausflug mit der Familie endet in einer absurden Indoor-Spiellandschaft.",
-    "fullSummary": "Längere Zusammenfassung des Traums.",
-    "transcript": "Vollständiges Transkript der Sprachnachricht.",
-    "keyTopics": ["Indoorspielplatz", "Familie", "Unfall"],
-    "people": ["Eltern", "Tobi", "Lucy"],
-    "places": ["Urlaubsort", "Indoor-Spiellandschaft"],
-    "mood": ["Verwirrung", "Stress"],
-    "actionItems": [],
-    "reflectionNotes": ["Möglicher Hinweis auf Kontrollverlust."],
-    "imageStatus": "ready",
-    "imageUrl": "https://<deine-public-bucket-domain>/dream-17.png"
-  }
-]
-```
-
----
-
-### 8.2 Note erstellen
-
-```http
-POST /webhook/notes
-```
-
-Request Body:
-
-```json
-{
-  "title": "Unfall in Indoorspielplatz",
-  "category": "Surrealer Traum",
-  "shortSummary": "Ein Ausflug mit der Familie endet in einer absurden Indoor-Spiellandschaft.",
-  "fullSummary": "Längere Zusammenfassung des Traums.",
-  "transcript": "Vollständiges Transkript.",
-  "keyTopics": ["Indoorspielplatz", "Familie", "Unfall"],
-  "people": ["Eltern", "Tobi", "Lucy"],
-  "places": ["Urlaubsort", "Indoor-Spiellandschaft"],
-  "mood": ["Verwirrung", "Stress"],
-  "actionItems": [],
-  "reflectionNotes": ["Möglicher Hinweis auf Kontrollverlust."]
-}
-```
-
-Beispiel mit `fetch`:
-
-```js
-const response = await fetch(`${N8N_API_URL}/webhook/notes`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "x-api-key": import.meta.env.VITE_N8N_API_KEY,
-  },
-  body: JSON.stringify(note),
-});
-
-const createdNote = await response.json();
-```
-
-Antwort:
-
-```json
-[
-  {
-    "id": 18,
-    "title": "Unfall in Indoorspielplatz",
-    "category": "Surrealer Traum",
-    "shortSummary": "Ein Ausflug mit der Familie endet in einer absurden Indoor-Spiellandschaft.",
-    "fullSummary": "Längere Zusammenfassung des Traums.",
-    "transcript": "Vollständiges Transkript.",
-    "keyTopics": ["Indoorspielplatz", "Familie", "Unfall"],
-    "people": ["Eltern", "Tobi", "Lucy"],
-    "places": ["Urlaubsort", "Indoor-Spiellandschaft"],
-    "mood": ["Verwirrung", "Stress"],
-    "actionItems": [],
-    "reflectionNotes": ["Möglicher Hinweis auf Kontrollverlust."],
-    "imageStatus": null,
-    "imageUrl": null
-  }
-]
-```
-
----
-
-### 8.3 Note aktualisieren
-
-```http
-PATCH /webhook/notes?id=<NOTE_ID>
-```
-
-Beispiel:
-
-```http
-PATCH /webhook/notes?id=18
-```
-
-Request Body:
-
-```json
-{
-  "title": "Geänderter Titel",
-  "category": "Surrealer Traum",
-  "shortSummary": "Neue Kurzbeschreibung.",
-  "fullSummary": "Neue ausführliche Zusammenfassung.",
-  "transcript": "Aktualisiertes Transkript.",
-  "keyTopics": ["Thema 1", "Thema 2"],
-  "people": ["Person 1"],
-  "places": ["Ort 1"],
-  "mood": ["Verwirrung"],
-  "actionItems": [],
-  "reflectionNotes": ["Neue Reflexion."]
-}
-```
-
-Beispiel mit `fetch`:
-
-```js
-const response = await fetch(`${N8N_API_URL}/webhook/notes?id=${id}`, {
-  method: "PATCH",
-  headers: {
-    "Content-Type": "application/json",
-    "x-api-key": import.meta.env.VITE_N8N_API_KEY,
-  },
-  body: JSON.stringify(updatedNote),
-});
-
-const updated = await response.json();
-```
-
-Antwort:
-
-```json
-[
-  {
-    "id": 18,
-    "title": "Geänderter Titel",
-    "category": "Surrealer Traum",
-    "shortSummary": "Neue Kurzbeschreibung.",
-    "fullSummary": "Neue ausführliche Zusammenfassung.",
-    "transcript": "Aktualisiertes Transkript.",
-    "keyTopics": ["Thema 1", "Thema 2"],
-    "people": ["Person 1"],
-    "places": ["Ort 1"],
-    "mood": ["Verwirrung"],
-    "actionItems": [],
-    "reflectionNotes": ["Neue Reflexion."],
-    "imageStatus": "ready",
-    "imageUrl": "https://<deine-public-bucket-domain>/dream-18.png"
-  }
-]
-```
-
----
-
-### 8.4 Note löschen
-
-```http
-DELETE /webhook/notes?id=<NOTE_ID>
-```
-
-Beispiel mit `fetch`:
-
-```js
-await fetch(`${N8N_API_URL}/webhook/notes?id=${id}`, {
-  method: "DELETE",
-  headers: {
-    "x-api-key": import.meta.env.VITE_N8N_API_KEY,
-  },
-});
-```
-
-Die Response kommt direkt aus n8n/Data Table. Für das Frontend reicht in der Regel:
-
-```js
-if (!response.ok) {
-  throw new Error("Note could not be deleted");
-}
-```
-
-Danach am besten die Liste erneut mit `GET /webhook/notes` laden.
-
----
-
-## 9. Frontend aus dem separaten Repo starten
-
-Das Frontend liegt in einem eigenen GitHub-Repository:
+Das Frontend liegt hier:
 
 ```text
 https://github.com/JakobFischer2574/dream-notes
 ```
 
-Schnellstart:
+Der API Workflow aus `APIs.json` stellt die Dream Notes für dieses Frontend bereit. Du musst im Frontend im Wesentlichen nur die n8n-Basis-URL und den API-Key eintragen.
+
+Beispiel für die benötigten Frontend-Umgebungsvariablen:
+
+```env
+VITE\_N8N\_API\_URL=https://<deine-n8n-domain>
+VITE\_N8N\_API\_KEY=<DEIN\_API\_KEY>
+```
+
+Das Frontend verwendet diese Werte, um den API Workflow in n8n zu erreichen. Die API-Logik ist bereits im Frontend-Repo umgesetzt, deshalb wird sie hier nicht noch einmal im Detail dokumentiert.
+
+Wichtig ist nur:
+
+|Einstellung|Bedeutung|
+|-|-|
+|`VITE\_N8N\_API\_URL`|Domain deiner n8n-Instanz|
+|`VITE\_N8N\_API\_KEY`|Wert aus dem Header-Auth-Credential des API Workflows|
+
+Achte darauf, dass `VITE\_N8N\_API\_URL` nur die Basis deiner n8n-Instanz enthält. Falls das Frontend den Pfad selbst ergänzt, sollte dort also nicht zusätzlich `/webhook/notes` eingetragen werden.
+
+\---
+
+## 8\. Frontend starten
+
+Frontend klonen:
 
 ```bash
 git clone https://github.com/JakobFischer2574/dream-notes.git
@@ -582,116 +338,51 @@ cd dream-notes
 npm install
 ```
 
-Lege anschließend im Frontend eine `.env`-Datei an. Wichtig sind vor allem die URL zu deiner n8n-Instanz und der API-Key aus dem Header-Auth-Credential des `APIs.json`-Workflows:
+Dann eine `.env`-Datei im Frontend anlegen und die n8n-Werte eintragen:
 
 ```env
-VITE_N8N_API_URL=https://<deine-n8n-domain>
-VITE_N8N_API_KEY=<DEIN_API_KEY>
+VITE\_N8N\_API\_URL=https://<deine-n8n-domain>
+VITE\_N8N\_API\_KEY=<DEIN\_API\_KEY>
 ```
 
-Danach kannst du das Frontend lokal starten:
+Frontend lokal starten:
 
 ```bash
 npm run dev
 ```
 
-Die API-Basis im Frontend sollte auf diesen Endpoint zeigen:
+Wenn das Frontend produktiv deployed wird, müssen dieselben Umgebungsvariablen auch beim jeweiligen Hoster gesetzt werden.
 
-```text
-https://<deine-n8n-domain>/webhook/notes
-```
+\---
 
-Für lokale n8n-Tests kann stattdessen die Test-URL verwendet werden:
+## 9\. Was das Frontend vom API Workflow bekommt
 
-```text
-https://<deine-n8n-domain>/webhook-test/notes
-```
+Das Frontend erhält Dream Notes mit den wichtigsten Feldern für Anzeige, Bearbeitung und Bilddarstellung:
 
-Wenn das Frontend produktiv deployed wird, müssen dieselben Umgebungsvariablen beim Hoster gesetzt werden.
+|Feld|Bedeutung|
+|-|-|
+|`id`|interne ID der Note|
+|`title`|kurzer Titel|
+|`category`|Kategorie des Traums|
+|`shortSummary`|kurze Zusammenfassung|
+|`fullSummary`|ausführlichere Zusammenfassung|
+|`transcript`|ursprüngliches Transkript|
+|`keyTopics`|Themen als Array|
+|`people`|Personen als Array|
+|`places`|Orte als Array|
+|`mood`|Stimmungen als Array|
+|`actionItems`|mögliche Aufgaben als Array|
+|`reflectionNotes`|Reflexionsnotizen als Array|
+|`imageStatus`|Status der Bildgenerierung, z. B. `pending` oder `ready`|
+|`imageUrl`|öffentliche URL zum generierten Bild|
 
----
+Für die normale Nutzung reicht es, wenn das Frontend diese Daten lesen, anzeigen, bearbeiten und löschen kann. Die genaue Request-Logik ist im Frontend-Repo enthalten.
 
-## 10. Empfohlene Frontend-Umgebungsvariablen
+\---
 
-Beispiel für `.env`:
+## 10\. Wichtig: Array-Felder sauber speichern
 
-```env
-VITE_N8N_API_URL=https://<deine-n8n-domain>
-VITE_N8N_API_KEY=<DEIN_API_KEY>
-```
-
-Beispiel-Helper:
-
-```js
-const API_BASE = `${import.meta.env.VITE_N8N_API_URL}/webhook/notes`;
-
-export async function getNotes() {
-  const response = await fetch(API_BASE, {
-    headers: {
-      "x-api-key": import.meta.env.VITE_N8N_API_KEY,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Could not fetch notes");
-  }
-
-  return response.json();
-}
-
-export async function createNote(note) {
-  const response = await fetch(API_BASE, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": import.meta.env.VITE_N8N_API_KEY,
-    },
-    body: JSON.stringify(note),
-  });
-
-  if (!response.ok) {
-    throw new Error("Could not create note");
-  }
-
-  return response.json();
-}
-
-export async function updateNote(id, note) {
-  const response = await fetch(`${API_BASE}?id=${id}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": import.meta.env.VITE_N8N_API_KEY,
-    },
-    body: JSON.stringify(note),
-  });
-
-  if (!response.ok) {
-    throw new Error("Could not update note");
-  }
-
-  return response.json();
-}
-
-export async function deleteNote(id) {
-  const response = await fetch(`${API_BASE}?id=${id}`, {
-    method: "DELETE",
-    headers: {
-      "x-api-key": import.meta.env.VITE_N8N_API_KEY,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Could not delete note");
-  }
-}
-```
-
----
-
-## 11. Wichtig: Array-Felder sauber speichern
-
-Für das Frontend sind diese Felder Arrays:
+Für das Frontend sollten diese Felder als Arrays zurückkommen:
 
 ```text
 keyTopics
@@ -702,7 +393,7 @@ actionItems
 reflectionNotes
 ```
 
-Damit sie beim Abrufen auch wieder als Arrays zurückkommen, sollten sie in der Data Table als JSON-String gespeichert werden.
+Deshalb sollten sie in der Data Table als JSON-String gespeichert werden, nicht nur als kommaseparierter Text.
 
 Empfohlene n8n-Expression für diese Felder:
 
@@ -716,78 +407,68 @@ statt:
 {{ $json.body.keyTopics.join(', ') }}
 ```
 
-Das ist besonders wichtig in `APIs.json` bei:
+Das betrifft vor allem die Nodes `Insert row` und `Update row(s)` im API Workflow. Wenn dort nur `.join(', ')` verwendet wird, sehen die Werte zwar lesbar aus, lassen sich später aber nicht zuverlässig wieder als Arrays parsen.
 
-```text
-Insert row
-Update row(s)
-```
+\---
 
-Wenn du `join(', ')` verwendest, werden die Daten zwar lesbar gespeichert, aber beim späteren `JSON.parse(...)` nicht zuverlässig wieder zu Arrays.
-
----
-
-## 12. Quick Start Checkliste
+## 11\. Quick Start Checkliste
 
 1. `MainWorkflow.json` und `APIs.json` in n8n importieren.
-2. Data Table `voice_notes_table` mit allen Spalten erstellen.
+2. Data Table `voice\_notes\_table` mit allen Spalten erstellen.
 3. Alle Data-Table-Nodes auf diese Tabelle setzen.
-4. Credentials anlegen:
-   - Twilio API
-   - Twilio Media Basic Auth
-   - AssemblyAI
-   - Google Gemini
-   - S3/R2
-   - Header Auth für Frontend
-5. Twilio-Nummern in allen WhatsApp-Nodes anpassen.
+4. Credentials anlegen und zuweisen:
+
+   * Twilio API
+   * Twilio Media Basic Auth
+   * AssemblyAI
+   * Google Gemini
+   * S3/R2
+   * Header Auth für das Frontend
+5. Twilio-Nummern in den WhatsApp-Nodes anpassen.
 6. Public Image URL im Node `Upsert row(s)` anpassen.
-7. Beide Workflows aktivieren.
+7. Main Workflow aktivieren.
 8. Twilio Incoming Webhook auf `/webhook/whatsapp` setzen.
-9. Frontend aus `https://github.com/JakobFischer2574/dream-notes` klonen und `.env` setzen.
-10. WhatsApp-Audio senden und prüfen, ob eine neue Zeile in der Data Table entsteht.
-11. Frontend mit `/webhook/notes` verbinden und `GET /webhook/notes` testen.
+9. API Workflow aktivieren.
+10. Frontend aus `https://github.com/JakobFischer2574/dream-notes` klonen.
+11. Im Frontend `.env` mit n8n-Domain und API-Key setzen.
+12. WhatsApp-Audio senden und prüfen, ob eine neue Note in der Data Table entsteht.
+13. Frontend starten und prüfen, ob die Note angezeigt wird.
 
----
+\---
 
-## 13. Häufige Fehler
+## 12\. Häufige Fehler
 
-### `401 Unauthorized` beim Frontend
+### Frontend bekommt `401 Unauthorized`
 
-Der Header fehlt oder ist falsch:
+Der API-Key fehlt oder stimmt nicht mit dem Header-Auth-Credential im API Workflow überein. Prüfe `VITE\_N8N\_API\_KEY` im Frontend.
 
-```http
-x-api-key: <DEIN_API_KEY>
-```
+\---
 
-### Frontend erreicht die API nicht
+### Frontend erreicht n8n nicht
 
-Prüfe im Frontend die `.env`-Werte:
+Prüfe `VITE\_N8N\_API\_URL`. Der Wert sollte auf deine n8n-Instanz zeigen. Wenn im Frontend-Code der Webhook-Pfad bereits ergänzt wird, darfst du ihn nicht zusätzlich in der Umgebungsvariable eintragen.
 
-```env
-VITE_N8N_API_URL=https://<deine-n8n-domain>
-VITE_N8N_API_KEY=<DEIN_API_KEY>
-```
-
-Die URL darf normalerweise nicht direkt `/webhook/notes` enthalten, wenn der Code bereits selbst `/webhook/notes` anhängt. Sonst entsteht versehentlich eine doppelte URL wie `/webhook/notes/webhook/notes`.
+\---
 
 ### WhatsApp-Audio wird nicht heruntergeladen
 
-Prüfe den `HTTP Request`-Node. Für Twilio-Media-URLs brauchst du HTTP Basic Auth mit:
+Prüfe den `HTTP Request`-Node im Main Workflow. Für Twilio-Media-URLs wird HTTP Basic Auth mit Twilio Account SID und Twilio Auth Token benötigt.
 
-```text
-Username: Twilio Account SID
-Password: Twilio Auth Token
-```
+\---
 
 ### Workflow findet die Tabelle nicht
 
-Nach dem Import ist die alte Data-Table-ID ungültig. Öffne alle Data-Table-Nodes und wähle deine lokale `voice_notes_table` neu aus.
+Nach dem Import ist die alte Data-Table-ID ungültig. Öffne alle Data-Table-Nodes und wähle deine lokale `voice\_notes\_table` neu aus.
+
+\---
 
 ### Gemini-Node gibt kein valides JSON zurück
 
-Der Workflow erwartet valides JSON. Prüfe den Node `Message a model` und teste den Output. Der nachfolgende Code-Node entfernt zwar Markdown-Codeblöcke, aber der Inhalt muss am Ende parsebares JSON sein.
+Der Workflow erwartet valides JSON. Prüfe den Output des Nodes `Message a model`. Der nachfolgende Code-Node entfernt zwar Markdown-Codeblöcke, aber der Inhalt muss am Ende parsebares JSON sein.
 
-### Bilder werden generiert, aber nicht angezeigt
+\---
+
+### Bilder werden generiert, aber im Frontend nicht angezeigt
 
 Prüfe:
 
@@ -796,12 +477,25 @@ S3/R2 Credential
 Bucket-Name
 öffentliche Bucket-URL im Node Upsert row(s)
 Dateiname dream-<id>.png
+imageUrl in der Data Table
 ```
 
----
+\---
 
-## 14. Sicherheit
+## 13\. Sicherheit
 
 Keine echten Tokens, Telefonnummern oder Secrets in das Repository committen.
 
-Nutze Platzhalter in den Workflow-Dateien oder dokumentiere die benötigten Werte über `.env.example`. Der Frontend-API-Key sollte regelmäßig geändert werden, wenn er versehentlich veröffentlicht wurde.
+Besonders schützen solltest du:
+
+```text
+Twilio Account SID / Auth Token
+AssemblyAI API Key
+Google Gemini API Key
+S3/R2 Access Key und Secret
+Frontend API Key aus Header Auth
+private Telefonnummern
+```
+
+Nutze Platzhalter in den Workflow-Dateien und setze echte Werte nur direkt in n8n bzw. als Umgebungsvariablen beim Frontend-Deployment.
+
